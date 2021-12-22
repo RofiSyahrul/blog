@@ -1,0 +1,17 @@
+node_modules
+
+/.cache
+/build
+/public/build
+/public/manifest.json
+/public/icon.png
+
+.DS_Store
+yarn-error.log
+
+package-lock.json
+
+.env
+*.env.sh
+
+/prisma/dev.db*
