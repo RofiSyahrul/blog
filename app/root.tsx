@@ -1,7 +1,16 @@
-import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useCatch } from 'remix';
+import {
+  Links,
+  LiveReload,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useCatch,
+  useLocation
+} from 'remix';
 import type { LinksFunction, MetaFunction } from 'remix';
 
-import { buildLinks, buildMeta, defaultTitle } from '~/utils/server/head.server';
+import { buildLinks, buildMeta } from '~/utils/server/head.server';
 import {
   buildAppleAppMeta,
   buildAppleTouchStartupImageLinks,
@@ -15,7 +24,7 @@ export const meta: MetaFunction = () => {
     ...buildBaseMeta(),
     ...buildAppleAppMeta(),
     ...buildMSAppMeta(),
-    ...buildMeta({ hideTitle: true })
+    ...buildMeta()
   };
 };
 
@@ -52,20 +61,27 @@ type DocumentProps = {
   title?: string;
 };
 
-function Document({ children, title = defaultTitle }: DocumentProps) {
+function Document({ children, title }: DocumentProps) {
+  const { pathname } = useLocation();
+  const isAdmin = pathname.startsWith('/admin/');
+
   return (
     <html lang='en'>
       <head>
         <meta charSet='utf-8' />
         <meta httpEquiv='X-UA-Compatible' content='IE=edge' />
-        <title>{title}</title>
+        {title && <title>{title}</title>}
         <Meta />
         <Links />
       </head>
       <body>
         {children}
-        <ScrollRestoration />
-        <Scripts />
+        {!isAdmin && (
+          <>
+            <ScrollRestoration />
+            <Scripts />
+          </>
+        )}
         {process.env.NODE_ENV === 'development' && <LiveReload />}
       </body>
     </html>
@@ -84,9 +100,7 @@ export function CatchBoundary() {
   const caught = useCatch();
 
   return (
-    <Document
-      title={`${caught.status} ${caught.statusText}`}
-    >
+    <Document title={`${caught.status} ${caught.statusText}`}>
       <div className='error-container'>
         <h1>
           {caught.status} {caught.statusText}
